@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class FileAnalyser {
 
     private static final String INPUT_START = "java FileAnalyzer ";
@@ -39,7 +40,7 @@ public class FileAnalyser {
         }
     }
 
-    private static RequestInfo validateRequest(String input) {
+    static RequestInfo validateRequest(String input) {
         try {
             if (input.contains(INPUT_START)) {
                 String pathAndWord = input.substring(INPUT_START.length());
@@ -48,13 +49,15 @@ public class FileAnalyser {
                 String fileContent = readContent(path);
                 return new RequestInfo(word, fileContent);
             }
-        } catch (Exception e) {
+        } catch (IndexOutOfBoundsException e) {
+            throw new RuntimeException("Exception while validate request: missing requested word or path to file");
+        } catch (IOException e) {
             throw new RuntimeException("Exception while validate request: " + e.getMessage());
         }
         throw new IllegalArgumentException("Request entered incorrectly. Try typing: \"java FileAnalyser *file path* *word*\"");
     }
 
-    private static int countWordRepetition(RequestInfo request) {
+    static int countWordRepetition(RequestInfo request) {
         int count = 0;
         int index = 0;
         String fileContent = request.content.toUpperCase();
@@ -70,7 +73,7 @@ public class FileAnalyser {
         return count;
     }
 
-    private static List<String> getSentences(RequestInfo request) {
+    static List<String> getSentences(RequestInfo request) {
         String[] sentences = request.content.split("[.!?]");
         List<String> resultSentences = new ArrayList<>();
         for (String sentence : sentences) {
@@ -82,8 +85,8 @@ public class FileAnalyser {
         return resultSentences;
     }
 
-    @SuppressWarnings(value = "all")
-    private static String readContent(String path) throws IOException {
+
+    static String readContent(String path) throws IOException {
         File file = new File(path);
         try (InputStream inputStream = new FileInputStream(file)) {
             byte[] text = new byte[(int) file.length()];
@@ -92,8 +95,8 @@ public class FileAnalyser {
         }
     }
 
-    @SuppressWarnings("all")
-    private static class RequestInfo {
+
+    static class RequestInfo {
         private final String word;
         private final String content;
 
@@ -101,9 +104,17 @@ public class FileAnalyser {
             this.content = content;
             this.word = word;
         }
+
+        public String getContent() {
+            return content;
+        }
+
+        public String getWord() {
+            return word;
+        }
     }
 
-    @SuppressWarnings("all")
+
     public static class AnalyseInfo {
         private final List<String> sentences;
         private final int count;

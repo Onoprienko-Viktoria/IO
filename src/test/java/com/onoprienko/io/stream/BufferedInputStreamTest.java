@@ -48,24 +48,52 @@ class BufferedInputStreamTest {
     void testReadToArray() throws IOException {
         String content = "Java test byte array input stream";
 
-        BufferedInputStream byteArrayInputStream = new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 100);
-
-        byte[] result = new byte[content.length()];
-        int readSize = byteArrayInputStream.read(result);
-        assertNotEquals(-1, readSize);
-        assertEquals(content, new String(result).trim());
+        try (BufferedInputStream byteArrayInputStream =
+                     new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 100)) {
+            byte[] result = new byte[content.length()];
+            int readSize = byteArrayInputStream.read(result);
+            assertNotEquals(-1, readSize);
+            assertEquals(content, new String(result).trim());
+        }
     }
+
+    @Test
+    void testReadFromBufferThatSmallerThanResultBuffer() throws IOException {
+        String content = "Java test byte array input stream. Java test byte array input stream. Java test byte array input stream. Java test byte array input stream.";
+
+        try (BufferedInputStream byteArrayInputStream =
+                     new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 10)) {
+            byte[] result = new byte[content.length()];
+            int readSize = byteArrayInputStream.read(result);
+            assertNotEquals(-1, readSize);
+            assertEquals(content, new String(result));
+        }
+    }
+
+    @Test
+    void testReadReturnMinusOneIfContentEnd() throws IOException {
+        String content = "Java test byte array input stream. Java test byte array input stream. Java test byte array input stream. Java test byte array input stream.";
+
+        try (BufferedInputStream byteArrayInputStream =
+                     new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 10)) {
+            byte[] result = new byte[1000];
+            int readSize = byteArrayInputStream.read(result);
+            assertEquals(-1, readSize);
+            assertEquals(content, new String(result).substring(0, content.length()));
+        }
+    }
+
 
     @Test
     void testReadToSmallArray() throws IOException {
         String content = "Java test byte array input stream";
 
-        BufferedInputStream byteArrayInputStream = new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 1);
-
-        byte[] result = new byte[1];
-        int readSize = byteArrayInputStream.read(result);
-        assertNotEquals(-1, readSize);
-        assertEquals("J", new String(result).trim());
+        try (BufferedInputStream byteArrayInputStream = new BufferedInputStream(new java.io.ByteArrayInputStream(content.getBytes()), 1)) {
+            byte[] result = new byte[1];
+            int readSize = byteArrayInputStream.read(result);
+            assertNotEquals(-1, readSize);
+            assertEquals("J", new String(result).trim());
+        }
     }
 
 }

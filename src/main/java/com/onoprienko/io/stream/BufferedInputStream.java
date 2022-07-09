@@ -38,12 +38,14 @@ public class BufferedInputStream extends InputStream {
         while (true) {
             int endIndex = Math.min(capacity, len);
             System.arraycopy(buffer, position, b, off, endIndex);
+
             off += endIndex;
-            len = len - endIndex;
+            len -= endIndex;
+            endIndex += endIndex;
+
             if (len <= 0) {
                 break;
             }
-            position = capacity;
             if (target.read(buffer) < 0) {
                 return -1;
             }

@@ -91,7 +91,7 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    void testReadFromMiddleToEnd() {
+    void testReadIntoMiddleToEnd() {
         String content = "Java test byte array input stream";
         int startIndex = content.indexOf("byte");
         int endIndex = content.length() - startIndex;
@@ -117,7 +117,7 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    void testReadFromEndReturnEmpty() {
+    void testReadToEndReturnEmpty() {
         String content = "Java test byte array input stream";
         int startIndex = content.length();
         int endIndex = 0;

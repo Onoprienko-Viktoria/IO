@@ -39,7 +39,7 @@ public class FileManagerTest {
 
 
         try (FileWriter fileWriter = new FileWriter(file4)) {
-            String text ="Олень - северное животное. " +
+            String text = "Олень - северное животное. " +
                     "В летнее время оленям в тайге жарко, а в горах даже в июле холодно. ";
             fileWriter.write(text);
         }
