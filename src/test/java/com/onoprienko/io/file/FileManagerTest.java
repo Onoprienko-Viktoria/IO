@@ -8,9 +8,12 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class FileManagerTest {
+
+    private final static String TEST_PATH = "C:/Windows";
 
     @BeforeEach
     @SuppressWarnings("all")
@@ -187,5 +190,16 @@ public class FileManagerTest {
         path2.delete();
         File path3 = new File("./src/test/resources/path3");
         path3.delete();
+    }
+
+
+    @Test
+    void testCountDirsOnCWindowsPath() throws IOException {
+        assertTrue(FileManager.countDirs(TEST_PATH) > 1);
+    }
+
+    @Test
+    void testCountFilesOnCWindowsPath() throws IOException {
+        assertTrue(FileManager.countFiles(TEST_PATH) > 1);
     }
 }

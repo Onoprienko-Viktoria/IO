@@ -1,6 +1,7 @@
-package com.onoprienko.io.file;
+package com.onoprienko.io.file.fileanalyser;
 
-import com.onoprienko.io.file.FileAnalyser.RequestInfo;
+import com.onoprienko.io.file.fileanalyser.entity.AnalyseInfo;
+import com.onoprienko.io.file.fileanalyser.entity.RequestInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.List;
 
-import static com.onoprienko.io.file.FileAnalyser.countWordRepetition;
-import static com.onoprienko.io.file.FileAnalyser.getSentences;
+import static com.onoprienko.io.file.fileanalyser.FileAnalyser.countWordRepetition;
+import static com.onoprienko.io.file.fileanalyser.FileAnalyser.getSentences;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FileAnalyserTest {
@@ -24,14 +25,13 @@ class FileAnalyserTest {
             "Олени крутые!";
 
     @BeforeEach
-    @SuppressWarnings("all")
     public void create() throws IOException {
         File path1 = new File("./src/test/resources/path1");
-        path1.mkdirs();
+        boolean mkdirs = path1.mkdirs();
         File file1 = new File(FILE_PATH_1);
-        file1.createNewFile();
+        boolean newFile = file1.createNewFile();
         File file2 = new File(FILE_PATH_2);
-        file2.createNewFile();
+        boolean newFile1 = file2.createNewFile();
 
         try (FileWriter fileWriter = new FileWriter(file2)) {
             fileWriter.write(FILE_CONTENT);
@@ -45,7 +45,7 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream(request.getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            FileAnalyser.analyse();
+            FileAnalyserStarter.startAnalyse();
             String outputContent = output.toString();
             assertEquals("""
                             Print file path and word:\r
@@ -60,14 +60,14 @@ class FileAnalyserTest {
 
     @Test
     public void testAnalyseWithReturnValueVoidFileReturnZeroResult() {
-        FileAnalyser.AnalyseInfo analyseResult = FileAnalyser.analyse(FILE_PATH_1, "олень");
+        AnalyseInfo analyseResult = FileAnalyser.analyse(FILE_PATH_1, "олень");
         assertEquals(0, analyseResult.getCount());
         assertEquals(0, analyseResult.getSentences().size());
     }
 
     @Test
     public void testAnalyseWithReturnValueFileWithoutRequestedWordReturnZeroResult() {
-        FileAnalyser.AnalyseInfo analyseResult = FileAnalyser.analyse(FILE_PATH_1, "test");
+        AnalyseInfo analyseResult = FileAnalyser.analyse(FILE_PATH_1, "test");
         assertEquals(0, analyseResult.getCount());
         assertEquals(0, analyseResult.getSentences().size());
     }
@@ -79,8 +79,8 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream(request.getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyser::analyse);
-            assertEquals("Request entered incorrectly. Try typing: \"java FileAnalyser *file path* *word*\"",
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyserStarter::startAnalyse);
+            assertEquals("java.lang.IllegalArgumentException: Request entered incorrectly. Try typing: \"java FileAnalyser *file path* *word*\"",
                     runtimeException.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,8 +94,8 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream("java FileAnalyzer ./path/file олень".getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyser::analyse);
-            assertEquals("Exception while validate request: .\\path\\file (The system cannot find the path specified)",
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyserStarter::startAnalyse);
+            assertEquals("java.lang.RuntimeException: Exception while validate request: ",
                     runtimeException.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,7 +110,7 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream(request.getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            FileAnalyser.analyse();
+            FileAnalyserStarter.startAnalyse();
             String outputContent = output.toString();
             assertEquals("""
                             Print file path and word:\r
@@ -135,7 +135,7 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream(request.getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            FileAnalyser.analyse();
+            FileAnalyserStarter.startAnalyse();
             String outputContent = output.toString();
             assertEquals("""
                             Print file path and word:\r
@@ -156,8 +156,8 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream(request.getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyser::analyse);
-            assertEquals("Exception while validate request: missing requested word or path to file",
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyserStarter::startAnalyse);
+            assertEquals("java.lang.RuntimeException: Exception while validate request: missing requested word or path to file",
                     runtimeException.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
@@ -170,8 +170,8 @@ class FileAnalyserTest {
              java.io.ByteArrayInputStream input = new java.io.ByteArrayInputStream("java FileAnalyzer test".getBytes())) {
             System.setIn(input);
             System.setOut(new PrintStream(output));
-            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyser::analyse);
-            assertEquals("Exception while validate request: missing requested word or path to file",
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, FileAnalyserStarter::startAnalyse);
+            assertEquals("java.lang.RuntimeException: Exception while validate request: missing requested word or path to file",
                     runtimeException.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
@@ -274,7 +274,7 @@ class FileAnalyserTest {
     @Test
     public void validateRequestReturnRequestInfo() {
         String request = "java FileAnalyzer " + FILE_PATH_2 + " олень";
-        RequestInfo resultRequest = FileAnalyser.validateRequest(request);
+        RequestInfo resultRequest = FileAnalyserStarter.validateRequest(request);
         assertEquals("олень", resultRequest.getWord());
         assertEquals(FILE_CONTENT, resultRequest.getContent());
     }
@@ -282,7 +282,7 @@ class FileAnalyserTest {
     @Test
     public void validateRequestReturnRequestInfoWithEmptyContent() {
         String request = "java FileAnalyzer " + FILE_PATH_1 + " олень";
-        RequestInfo resultRequest = FileAnalyser.validateRequest(request);
+        RequestInfo resultRequest = FileAnalyserStarter.validateRequest(request);
         assertEquals("олень", resultRequest.getWord());
         assertEquals("", resultRequest.getContent());
     }
@@ -290,21 +290,21 @@ class FileAnalyserTest {
     @Test
     public void validateRequestReturnExceptionIfWordIsMissing() {
         String request = "java FileAnalyzer " + FILE_PATH_1;
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyser.validateRequest(request));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyserStarter.validateRequest(request));
         assertEquals("Exception while validate request: missing requested word or path to file", runtimeException.getMessage());
     }
 
     @Test
     public void validateRequestReturnExceptionIfPathToFileIsMissing() {
         String request = "java FileAnalyzer word";
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyser.validateRequest(request));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyserStarter.validateRequest(request));
         assertEquals("Exception while validate request: missing requested word or path to file", runtimeException.getMessage());
     }
 
     @Test
     public void validateRequestReturnExceptionIfStartOfCommandIsMissing() {
         String request = FILE_PATH_2 + " word";
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyser.validateRequest(request));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> FileAnalyserStarter.validateRequest(request));
         assertEquals("Request entered incorrectly. Try typing: \"java FileAnalyser *file path* *word*\"",
                 runtimeException.getMessage());
     }

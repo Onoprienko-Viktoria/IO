@@ -2,19 +2,21 @@ package com.onoprienko.io.stream;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ByteArrayInputStreamTest {
 
     @Test
-    public void testReadSingleChar() {
+    public void testReadSingleChar() throws IOException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("H".getBytes());
         assertEquals('H', (char) byteArrayInputStream.read());
         assertEquals(-1, byteArrayInputStream.read());
     }
 
     @Test
-    public void testReadFewSingleChars() {
+    public void testReadFewSingleChars() throws IOException {
         String content = "Hello";
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
         assertEquals('H', (char) byteArrayInputStream.read());
@@ -26,7 +28,7 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    public void testReadOnEmptyContentReturnMinusOne() {
+    public void testReadOnEmptyContentReturnMinusOne() throws IOException {
         String content = "";
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
 
@@ -42,19 +44,19 @@ class ByteArrayInputStreamTest {
 
 
     @Test
-    void testReadToArray() {
+    void testReadToArray() throws IOException {
         String content = "Java test byte array input stream";
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
 
         byte[] result = new byte[content.length()];
         int readSize = byteArrayInputStream.read(result);
-        assertNotEquals(-1, readSize);
+        assertEquals(-1, readSize);
         assertEquals(content, new String(result).trim());
     }
 
     @Test
-    void testReadToSmallArray() {
+    void testReadToSmallArray() throws IOException {
         String content = "Java test byte array input stream";
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
@@ -66,7 +68,7 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    void testReadEmptyArray() {
+    void testReadEmptyArray() throws IOException {
         String content = "";
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
@@ -78,7 +80,7 @@ class ByteArrayInputStreamTest {
 
 
     @Test
-    void testReadFromStart() {
+    void testReadFromStart() throws IOException {
         String content = "Java test byte array input stream";
         int startIndex = 0;
         int endIndex = content.length();
@@ -86,12 +88,12 @@ class ByteArrayInputStreamTest {
         byte[] result = new byte[endIndex];
         int readSize = byteArrayInputStream.read(result, startIndex, endIndex);
 
-        assertNotEquals(readSize, -1);
+        assertEquals(readSize, -1);
         assertEquals(content, new String(result));
     }
 
     @Test
-    void testReadIntoMiddleToEnd() {
+    void testReadIntoMiddleToEnd() throws IOException {
         String content = "Java test byte array input stream";
         int startIndex = content.indexOf("byte");
         int endIndex = content.length() - startIndex;
@@ -104,7 +106,7 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    void testReadIntoMiddle() {
+    void testReadIntoMiddle() throws IOException {
         String content = "Java test byte array input stream";
         int startIndex = content.indexOf("byte");
         int endIndex = content.indexOf("input");
@@ -117,16 +119,15 @@ class ByteArrayInputStreamTest {
     }
 
     @Test
-    void testReadToEndReturnEmpty() {
+    void testReadToEndReturnEmpty() throws IOException {
         String content = "Java test byte array input stream";
         int startIndex = content.length();
         int endIndex = 0;
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
         byte[] result = new byte[endIndex];
-        int readSize = byteArrayInputStream.read(result, startIndex, endIndex);
-
-        assertNotEquals(readSize, -1);
-        assertEquals("", new String(result));
+        ArrayIndexOutOfBoundsException exception = assertThrows(ArrayIndexOutOfBoundsException.class, () -> byteArrayInputStream.read(result, startIndex, endIndex));
+        assertEquals("arraycopy: last destination index 33 out of bounds for byte[0]",
+                exception.getMessage());
     }
 
 }

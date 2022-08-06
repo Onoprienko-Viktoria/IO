@@ -2,18 +2,19 @@ package com.onoprienko.io.file;
 
 import java.io.*;
 
-@SuppressWarnings("all")
 public class FileManager {
 
     public static int countFiles(String path) {
         int counter = 0;
         File directoryPath = new File(path);
         File[] files = directoryPath.listFiles();
-        for (File file : files) {
-            if (!file.isDirectory()) {
-                counter++;
-            } else {
-                counter += countFiles(file.getPath());
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    counter++;
+                } else {
+                    counter += countFiles(file.getPath());
+                }
             }
         }
         return counter;
@@ -24,9 +25,11 @@ public class FileManager {
         int result = 0;
         if (rootDir.isDirectory()) {
             File[] files = rootDir.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    result += 1 + FileManager.countDirs(file.getCanonicalPath());
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        result += 1 + FileManager.countDirs(file.getCanonicalPath());
+                    }
                 }
             }
         }
@@ -48,12 +51,12 @@ public class FileManager {
 
     private static void copyDirectories(String to, File[] files) throws IOException {
         for (File fileToCopy : files) {
-            File fileTo = new File(to + fileToCopy.separator + fileToCopy.getName());
+            File fileTo = new File(to, fileToCopy.getName());
             if (fileToCopy.isDirectory()) {
-                fileTo.mkdir();
-                copy(fileToCopy.getPath(), to + fileToCopy.separator + fileToCopy.getName());
+                boolean mkdir = fileTo.mkdir();
+                copy(fileToCopy.getPath(), to + File.separator + fileToCopy.getName());
             } else if (fileToCopy.isFile()) {
-                fileTo.createNewFile();
+                boolean newFile = fileTo.createNewFile();
                 copyFile(fileToCopy.getPath(), fileTo);
             }
         }
@@ -61,13 +64,12 @@ public class FileManager {
 
     private static void copyFile(String from, File fileTo) throws IOException {
         File fileFrom = new File(from);
-        fileTo.createNewFile();
         try (InputStream inputStream = new FileInputStream(fileFrom);
              OutputStream outputStream = new FileOutputStream(fileTo)) {
-            int length = (int) fileFrom.length();
-            byte[] content = new byte[length];
-            inputStream.read(content);
-            outputStream.write(content);
+            byte[] content = new byte[4096];
+            while (inputStream.read(content) != -1) {
+                outputStream.write(content);
+            }
         }
     }
 
@@ -77,16 +79,16 @@ public class FileManager {
         File[] files = fileToMove.listFiles();
         if (files != null) {
             for (File file : files) {
-                File fileTo = new File(to + file.separator + file.getName());
+                File fileTo = new File(to + File.separator + file.getName());
                 if (file.isDirectory()) {
-                    file.mkdir();
-                    move(file.getPath(), to + file.separator + file.getName());
+                    boolean mkdir = file.mkdir();
+                    move(file.getPath(), to + File.separator + file.getName());
                 } else if (file.isFile()) {
-                    file.createNewFile();
-                    new File(file.getPath()).renameTo(fileTo);
+                    boolean newFile = file.createNewFile();
+                    boolean isRenamed = new File(file.getPath()).renameTo(fileTo);
                 }
             }
         }
-        new File(from).renameTo(new File(to));
+        boolean isRenamed = new File(from).renameTo(new File(to));
     }
 }

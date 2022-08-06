@@ -9,45 +9,42 @@ public class BufferedInputStream extends InputStream {
     private final byte[] buffer;
     private int position;
     private final InputStream target;
-    private final int capacity;
+    private int capacity;
 
-    @SuppressWarnings("all")
-    public BufferedInputStream(InputStream target) throws IOException {
+    public BufferedInputStream(InputStream target) {
         this.target = target;
         this.buffer = new byte[DEFAULT_CAPACITY];
-        this.capacity = DEFAULT_CAPACITY;
-        target.read(buffer);
     }
 
-    @SuppressWarnings("all")
-    public BufferedInputStream(InputStream target, int capacity) throws IOException {
+    public BufferedInputStream(InputStream target, int capacity) {
         this.target = target;
         this.buffer = new byte[capacity];
-        this.capacity = capacity;
-        target.read(buffer);
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
+    public int read(byte[] bytes) throws IOException {
+        return read(bytes, 0, bytes.length);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int startLen = len;
+    public int read(byte[] bytes, int offset, int length) throws IOException {
+        int startLen = length;
         while (true) {
-            int endIndex = Math.min(capacity, len);
-            System.arraycopy(buffer, position, b, off, endIndex);
-
-            off += endIndex;
-            len -= endIndex;
-            endIndex += endIndex;
-
-            if (len <= 0) {
-                break;
+            if (position == capacity || capacity == 0) {
+                if (target.read(buffer) < 0) {
+                    return -1;
+                }
+                position = 0;
+                capacity = buffer.length;
             }
-            if (target.read(buffer) < 0) {
-                return -1;
+            int endIndex = Math.min(capacity, length);
+            System.arraycopy(buffer, position, bytes, offset, endIndex);
+
+            offset += endIndex;
+            length -= endIndex;
+            position += endIndex;
+            if (length <= 0) {
+                break;
             }
         }
         return startLen;

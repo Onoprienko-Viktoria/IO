@@ -5,10 +5,10 @@ import java.io.OutputStream;
 
 
 public class BufferedOutputStream extends OutputStream {
-    private byte[] buffer;
+    private final byte[] buffer;
     private final OutputStream target;
     private int position;
-    private int capacity;
+    private final int capacity;
     private final static int DEFAULT_CAPACITY = 5;
 
     public BufferedOutputStream(OutputStream target) {
@@ -34,15 +34,18 @@ public class BufferedOutputStream extends OutputStream {
 
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        while (len > 0) {
-            int endIndex = Math.min(capacity, len);
-            System.arraycopy(b, off, buffer, position, endIndex);
-            off += endIndex;
-            len = len - endIndex;
-            position = capacity;
-            flush();
+    public void write(byte[] bytes, int offset, int length) throws IOException {
+        while (length > 0) {
+            if (position == capacity) {
+                flush();
+            }
+            int endIndex = Math.min(capacity, length);
+            System.arraycopy(bytes, offset, buffer, position, endIndex);
+            offset += endIndex;
+            length = length - endIndex;
+            position = endIndex;
         }
+        flush();
     }
 
     @Override
